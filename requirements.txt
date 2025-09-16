@@ -1,0 +1,9 @@
+# Python dependencies for OOP Examples project
+# Add your project dependencies here
+
+# Example dependencies (uncomment as needed):
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
+# mypy>=0.950
+
