@@ -5,7 +5,11 @@ Contestar a continuación las siguientes preguntas:
 
 - Qué patrón de diseño podés identificar en el código dado?
 
+#Pude indentificar un patron singleton en la database, y un observer en la notificacion de cambios de turno- 
+
 - Qué patrones de diseño se podrían agregar para mejorar el código?
+ se puede implementar un factoty en la seccion de turnos porque evitamos poner los elif y hacemos un codigo mas legible segun las caracteriticas que posee en paciente ya sea la especialidad o la obre social
+se podria agregar un decorador  y la mejora de un builder 
 
 Implementar uno o más de estos patrones adicionales para mejorar el código.
 """
@@ -13,55 +17,109 @@ Implementar uno o más de estos patrones adicionales para mejorar el código.
 from typing import List, Optional
 
 
+#class TurnosMedicos:
+    #@staticmethod
+    #def main():
+        #print()
+        #print("Turnos Medicos")
+        #print("=============")
+        #print()
+        #database = Database.getInstance()
+
+        #paciente = Paciente("Ignacio Segovia", "IOMA", "isegovia@gmail.com")
+
+        #especialidad = "Cardiología"
+        #doctor = database.getDoctor(especialidad)
+        #if doctor is None:
+            #print("No se encontró el doctor de la especialidad", especialidad)
+            #return
+
+        # Precio base en base a la especialidad
+        #precio_base = 0
+        #if doctor.especialidad.contiene("Cardiología"):
+            #precio_base = 8000
+        #elif doctor.especialidad.contiene("Neumonología"):
+            #precio_base = 7000
+        #elif doctor.especialidad.contiene("Kinesiología"):
+            #precio_base = 7000
+        #else:
+            #precio_base = 5000
+
+        # Descuento en base a la obra social y la especialidad
+        #descuento = 0.0
+        #if paciente.obra_social == "OSDE":
+            #descuento = 1.0 if doctor.especialidad.contiene("Cardiología") else 0.2
+        #elif paciente.obra_social == "IOMA":
+            #descuento = 1.0 if doctor.especialidad.contiene("Kinesiología") else 0.15
+        #elif paciente.obra_social == "PAMI":
+            #descuento = 1.0
+        #else:
+            #descuento = 0.0
+
+        # Aplico el descuento
+        #precio = precio_base - precio_base * descuento
+
+        # Nuevo turno
+        #turno = Turno(paciente, doctor, "2025-01-01 10:00", precio)
+        #print(turno)
+
+        # Cambio de turno
+        #turno.set_fecha_y_hora("2025-01-01 11:00")
+        #print() 
+
 class TurnosMedicos:
     @staticmethod
     def main():
         print()
         print("Turnos Medicos")
-        print("=============")
+        print("==============")
         print()
-        database = Database.getInstance()
 
         paciente = Paciente("Ignacio Segovia", "IOMA", "isegovia@gmail.com")
-
         especialidad = "Cardiología"
-        doctor = database.getDoctor(especialidad)
-        if doctor is None:
-            print("No se encontró el doctor de la especialidad", especialidad)
+
+        turno = TurnoFactory.crear_turno(paciente, especialidad, "2025-01-01 10:00")
+        if turno is None:
             return
 
-        # Precio base en base a la especialidad
-        precio_base = 0
-        if doctor.especialidad.contiene("Cardiología"):
+        print(turno)
+
+        turno.set_fecha_y_hora("2025-01-01 11:00")
+        print()
+
+
+class TurnoFactory:
+    @staticmethod
+    def crear_turno(paciente: Paciente, especialidad: str, fecha_y_hora: str) -> Optional[Turno]:
+        database = Database.getInstance()
+        doctor = database.getDoctor(especialidad)
+
+        if doctor is None:
+            print(f"No hay  el doctor de la especialidad {especialidad}")
+            return None
+
+    
+        if doctor.especialidad.contiene("Cardiologia "):
             precio_base = 8000
-        elif doctor.especialidad.contiene("Neumonología"):
+        elif doctor.especialidad.contiene("Neumonologia"):
             precio_base = 7000
-        elif doctor.especialidad.contiene("Kinesiología"):
+        elif doctor.especialidad.contiene("Kinesiologia"):
             precio_base = 7000
         else:
             precio_base = 5000
 
-        # Descuento en base a la obra social y la especialidad
-        descuento = 0.0
+        
         if paciente.obra_social == "OSDE":
-            descuento = 1.0 if doctor.especialidad.contiene("Cardiología") else 0.2
+            descuento = 1.0 if doctor.especialidad.contiene("Cardiologia") else 0.2
         elif paciente.obra_social == "IOMA":
-            descuento = 1.0 if doctor.especialidad.contiene("Kinesiología") else 0.15
+            descuento = 1.0 if doctor.especialidad.contiene("Kinesiologgia") else 0.15
         elif paciente.obra_social == "PAMI":
             descuento = 1.0
         else:
             descuento = 0.0
 
-        # Aplico el descuento
-        precio = precio_base - precio_base * descuento
-
-        # Nuevo turno
-        turno = Turno(paciente, doctor, "2025-01-01 10:00", precio)
-        print(turno)
-
-        # Cambio de turno
-        turno.set_fecha_y_hora("2025-01-01 11:00")
-        print()
+        precio = precio_base - (precio_base * descuento)
+        return Turno(paciente, doctor, fecha_y_hora, precio)
 
 
 class Paciente:
@@ -90,7 +148,7 @@ class Especialidad:
         return self.descripcion
 
 
-class Doctor:
+class Doctor:  
     def __init__(self, nombre: str, especialidad: Especialidad, email: str):
         self.nombre = nombre
         self.especialidad = especialidad
@@ -98,14 +156,14 @@ class Doctor:
 
     def avisar_cambio_de_fecha_y_hora(self, turno: "Turno"):
         print(
-            f"Mail para {self.email}: El turno para {turno.paciente} se ha cambiado a {turno.fecha_y_hora}"
+            f"Mail para {self.email}: El turno para {turno.paciente} se cambio a {turno.fecha_y_hora}"
         )
 
     def __str__(self):
         return f"{self.nombre} ({self.especialidad})"
 
 
-class Turno:
+class Turno:  
     def __init__(
         self, paciente: Paciente, doctor: Doctor, fecha_y_hora: str, precio: float
     ):
@@ -126,7 +184,7 @@ class Turno:
         return f"Turno para {self.paciente} con {self.doctor} el {self.fecha_y_hora} - ${self.precio}"
 
 
-class Database:
+class Database:  
     _instance = None
     _doctores: List[Doctor] = []
 
@@ -192,7 +250,18 @@ class CreadorDeDoctores:
     @staticmethod
     def crear_clinico_general(nombre: str, email: str):
         return Doctor(nombre, Especialidad("Clínica > General"), email)
+    
+#aca creo que se podria hacer un builder mas generalizado, en vez de crear un clinico por cada especialidad, se crea un clinico solo, que despues se le agrega el atributo de especialidad. 
+
+#por ejemplo: 
+#clino.self = clinico
+#especialidad.self = especialidad
+#emaiñ.self = email 
+#y ahi despues retornar los valores mediante una entrada de valores (perdon no se explicar xd como una estructura paso por paso que funcione para todos) pero tal vez este equivocada 
+
+
 
 
 if __name__ == "__main__":
-    TurnosMedicos.main()
+   TurnosMedicos.main()
+
