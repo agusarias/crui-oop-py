@@ -4,14 +4,27 @@ Turnos Medicos
 Contestar a continuación las siguientes preguntas:
 
 - Qué patrón de diseño podés identificar en el código dado?
+- los patrones que se pueden identificar son el factory que se utiliza para la creación de doctores, el singleton que se utiliza para la base de datos
+  y tambien el observer que se utiliza para notificar a los pacientes y doctores sobre cambios en los turnos.
 
 - Qué patrones de diseño se podrían agregar para mejorar el código?
+- el patrón strategy podría ser útil para separar la lógica de cálculo de precios y descuentos teniendolas en clases separadas.
 
 Implementar uno o más de estos patrones adicionales para mejorar el código.
 """
 
 from typing import List, Optional
 
+        # Aplico el descuento
+#       precio = precio_base - precio_base * descuento
+
+        # Nuevo turno
+#       turno = Turno(paciente, doctor, "2025-01-01 10:00", precio)
+#        print(turno)
+
+        # Cambio de turno
+#        turno.set_fecha_y_hora("2025-01-01 11:00")
+#        print()#
 
 class TurnosMedicos:
     @staticmethod
@@ -25,12 +38,11 @@ class TurnosMedicos:
         paciente = Paciente("Ignacio Segovia", "IOMA", "isegovia@gmail.com")
 
         especialidad = "Cardiología"
-        doctor = database.getDoctor(especialidad)
+        doctor = database.getDoctor(especialidad) 
         if doctor is None:
             print("No se encontró el doctor de la especialidad", especialidad)
             return
-
-        # Precio base en base a la especialidad
+        # precios base por especialidad
         precio_base = 0
         if doctor.especialidad.contiene("Cardiología"):
             precio_base = 8000
@@ -41,28 +53,101 @@ class TurnosMedicos:
         else:
             precio_base = 5000
 
-        # Descuento en base a la obra social y la especialidad
+        # descuento segun OS y especialidad
         descuento = 0.0
         if paciente.obra_social == "OSDE":
-            descuento = 1.0 if doctor.especialidad.contiene("Cardiología") else 0.2
+            descuento = 1.0 if doctor.especialidad.contiene("Cardiología") else 0.2 
         elif paciente.obra_social == "IOMA":
             descuento = 1.0 if doctor.especialidad.contiene("Kinesiología") else 0.15
         elif paciente.obra_social == "PAMI":
             descuento = 1.0
         else:
             descuento = 0.0
-
+        
         # Aplico el descuento
-        precio = precio_base - precio_base * descuento
+#       precio = precio_base - precio_base * descuento
 
         # Nuevo turno
-        turno = Turno(paciente, doctor, "2025-01-01 10:00", precio)
-        print(turno)
+#       turno = Turno(paciente, doctor, "2025-01-01 10:00", precio)
+#        print(turno)
 
         # Cambio de turno
-        turno.set_fecha_y_hora("2025-01-01 11:00")
-        print()
+#        turno.set_fecha_y_hora("2025-01-01 11:00")
+#        print()#
 
+        #aplicar descuento
+        precio = precio_base - precio_base * descuento
+
+        #calculo de precio y descuento (strategy)
+        Precio_st = select_precio_st(doctor)
+        descuento_st = select_descuento_st(paciente.obra_social)
+
+        precio_base = Precio_st.calcular_precio(doctor)
+        descuento = descuento_st.calcular_descuento(doctor)
+        precio = precio_base - precio_base * descuento  
+
+#=================================strategy=====================================
+
+#precios
+class Preciost:
+    def calcular_precio(self, doctor: "Doctor") -> float:
+        raise NotImplementedError
+
+class cardiopreciost(Preciost):
+    def calcular_precio(self, doctor: "Doctor") -> float:
+        return 8000
+    
+class neumopreciost(Preciost):
+    def calcular_precio(self, doctor: "Doctor") -> float:
+        return 7000
+
+class kinesiopreciost(Preciost):
+    def calcular_precio(self, doctor: "Doctor") -> float:
+        return 7000
+    
+class generalpreciost(Preciost):
+    def calcular_precio(self, doctor: "Doctor") -> float:
+        return 5000
+    
+def select_precio_st(doctor: "Doctor") -> Preciost:
+    if doctor.especialidad.contiene("Cardiología"):
+        return cardiopreciost()
+    elif doctor.especialidad.contiene("Neumonología"):
+        return neumopreciost()
+    elif doctor.especialidad.contiene("Kinesiología"):
+        return kinesiopreciost()
+    else:
+        return generalpreciost()
+    
+#desduentos
+class Descuentost:
+    def clacular_descuento(self, paciente: "Paciente" , doctor: "Doctor") -> float:
+        raise NotImplementedError
+    
+class osdedescuentost(Descuentost):
+    def calcular_descuento(self, paciente: "Paciente", doctor: "Doctor") -> float:
+        return 1.0 if doctor.especialidad.contiene("Cardiología") else 0.2
+    
+class iomadescuentost(Descuentost):
+    def calcular_descuento(self, paciente: "Paciente", doctor: "Doctor") -> float:
+        return 1.0 if doctor.especialidad.contiene("Kinesiología") else 0.15
+ 
+class pamidescuentost(Descuentost):
+    def calcular_descuento(self, paciente: "Paciente", doctor: "Doctor") -> float:
+        return 1.0
+class nodescuentost(Descuentost):
+    def calcular_descuento(self, paciente: "Paciente", doctor: "Doctor") -> float:
+        return 0.0
+    
+def select_descuento_st(obra_social: str) -> Descuentost:
+    if obra_social == "OSDE":
+        return osdedescuentost()
+    elif obra_social == "IOMA":
+        return iomadescuentost()
+    elif obra_social == "PAMI":
+        return pamidescuentost()
+    return nodescuentost()
+#======================================================================
 
 class Paciente:
     def __init__(self, nombre: str, obra_social: str, email: str):
@@ -104,7 +189,7 @@ class Doctor:
     def __str__(self):
         return f"{self.nombre} ({self.especialidad})"
 
-
+#=================================OBSERVER=====================================
 class Turno:
     def __init__(
         self, paciente: Paciente, doctor: Doctor, fecha_y_hora: str, precio: float
@@ -125,7 +210,7 @@ class Turno:
     def __str__(self):
         return f"Turno para {self.paciente} con {self.doctor} el {self.fecha_y_hora} - ${self.precio}"
 
-
+#=================================SINGLETON=====================================
 class Database:
     _instance = None
     _doctores: List[Doctor] = []
@@ -166,6 +251,7 @@ class Database:
                 return doctor
         return None
 
+#=================================FACTORY=====================================
 
 class CreadorDeDoctores:
 
