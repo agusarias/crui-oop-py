@@ -15,17 +15,6 @@ Implementar uno o más de estos patrones adicionales para mejorar el código.
 
 from typing import List, Optional
 
-        # Aplico el descuento
-#       precio = precio_base - precio_base * descuento
-
-        # Nuevo turno
-#       turno = Turno(paciente, doctor, "2025-01-01 10:00", precio)
-#        print(turno)
-
-        # Cambio de turno
-#        turno.set_fecha_y_hora("2025-01-01 11:00")
-#        print()#
-
 class TurnosMedicos:
     @staticmethod
     def main():
