@@ -1,0 +1,20 @@
+- Qué patrón de diseño podés identificar en el código dado?
+    ConfigurationManager es un singleton.
+        Sólo puede haber una configuración y el __init__ levanta una excepción.
+
+    Mensaje es clase abstracta para decorator. El decorador base es MensajeSimple.
+        Decoradores como MensajeMejorado (No entiendo exactamente cuál es un decorador exacto a MensajeSimple), MensajeUrgente, MensajeConTimestamp, MensajeEnBase64 se encargan de añadir los campos mencionados.
+
+    EnviadorDeMensajes cumple el papel de Strategy u Observer, aunque no está aplicado.
+        Dependiendo del canal al que se envía, se encarga de disparar la cadena de instrucciones correspondientes y de la manera correspondiente
+
+
+
+- Qué patrones de diseño se podrían agregar para mejorar el código?
+    El disparo de notificaciones se puede transportar a Observers.
+    
+    En el diseño exacto actual, todo el procedimiento con decorators se genera con el objetivo expreso de usar todos los decorators y generar un mensaje formateado para multiplataforma, por lo que se puede simplificar con un Util de Facade.
+
+- Implementar uno o más de estos patrones adicionales para mejorar el código.
+    Añadido un Facade que se encarge de formatear todos los mensajes.
+    Añadida lógica de Listeners y uniformado para tener lista de Listeners en lugar de invocar cada notificación manualmente.
